@@ -3,386 +3,382 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="Zarduino" />
-    <link rel="manifest" href="/site.webmanifest" />
-    <title>Arduino Car BLE Controller</title>
+    <title>Digital Detective | Terminal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --background-color: #f0f0f0;
-            --text-color: #333;
-            --button-bg: #4CAF50;
-            --button-text: white;
-            --button-hover-bg: #45a049;
-            --stop-button-bg: #f44336;
-            --stop-button-hover-bg: #da190b;
-            --connect-button-bg: #008CBA;
-            --connect-button-hover-bg: #007bb5;
-            --status-color: #555;
-            --border-color: #ccc;
-            --footer-text-color: #666;
+            --bg: #0a0a0a;
+            --terminal-bg: #111111;
+            --green: #00ff41;
+            --dim-green: #008f11;
+            --blue: #00a3ff;
+            --border: #222;
+            --text: #e0e0e0;
         }
-        body.dark-mode {
-            --background-color: #000;
-            --text-color: #eee;
-            --button-bg: #4CAF50;
-            --button-text: #eee;
-            --button-hover-bg: #777;
-            --stop-button-bg: #880000;
-            --stop-button-hover-bg: #bb0000;
-            --connect-button-bg: #005f7f;
-            --connect-button-hover-bg: #004c66;
-            --status-color: #bbb;
-            --border-color: #444;
-            --footer-text-color: #4CAF50;
-        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-align: center;
-            margin: auto;
-            padding: 20px 20px 40px 20px;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
             height: 100vh;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-            box-sizing: border-box;
-        }
-        h1 {
-            color: var(--text-color);
-            margin-bottom: 40px;
-            font-size: 1.8em;
-        }
-        .control-panel {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, auto);
-            gap: 8px;
-            margin: 10px auto;
-            max-width: 300px;
-            width: 90%;
-            flex-shrink: 0;
-        }
-        .control-panel button {
-            width: 100%;
-            padding: 15px 0;
-            font-size: 20px;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-            color: var(--button-text);
-            background-color: var(--button-bg);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            -webkit-tap-highlight-color: transparent;
-        }
-        #forwardBtn { grid-area: 1 / 2 / 2 / 3; }
-        #leftBtn { grid-area: 2 / 1 / 3 / 2; }
-        #stopBtn { grid-area: 2 / 2 / 3 / 3; background-color: var(--stop-button-bg); }
-        #rightBtn { grid-area: 2 / 3 / 3 / 4; }
-        #backBtn { grid-area: 3 / 2 / 4 / 3; }
-        .control-panel button:active { transform: scale(0.95); }
-        .control-panel button:hover:not(#stopBtn) { background-color: var(--button-hover-bg); }
-        #stopBtn:hover { background-color: var(--stop-button-hover-bg); }
-        .control-panel button:disabled {
-            background-color: #a0a0a0;
-            cursor: not-allowed;
-            box-shadow: none;
-            color: #ccc;
-        }
-        #status {
-            margin-top: 15px;
-            padding: 10px;
-            font-size: 1em;
-            color: var(--status-color);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            background-color: var(--background-color);
-            max-width: 280px;
-            margin-left: auto;
-            margin-right: auto;
-            flex-shrink: 0;
-        }
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin: 20px auto;
-            width: fit-content;
-            flex-shrink: 0;
-        }
-        .action-buttons button {
-            width: 220px;
-            height: 50px;
-            font-size: 1.1em;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            -webkit-tap-highlight-color: transparent;
-        }
-        #connectESP32Btn {
-            background-color: var(--connect-button-bg);
-            color: var(--button-text);
-        }
-        #connectESP32Btn:hover { background-color: var(--connect-button-hover-bg); }
-        #connectESP32Btn:disabled {
-            background-color: #a0a0a0;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        #modeBtn {
-            background-color: #673AB7; /* Purple */
-            color: var(--button-text);
-        }
-        #modeBtn:hover { background-color: #5E35B1; }
-        .toggle-container {
-            margin-top: 15px;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
+            overflow: hidden;
+            padding: 10px;
         }
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 28px;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
+
+        /* Scanline CRT Effect */
+        body::after {
+            content: " ";
             position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ccc;
-            -webkit-transition: .4s;
-            transition: .4s;
-            border-radius: 34px;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%),
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 2px 100%;
+            pointer-events: none;
+            z-index: 10;
         }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px; width: 20px;
-            left: 4px; bottom: 4px;
-            background-color: white;
-            -webkit-transition: .4s;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider { background-color: #2196F3; }
-        input:focus + .slider { box-shadow: 0 0 1px #2196F3; }
-        input:checked + .slider:before {
-            -webkit-transform: translateX(20px);
-            -ms-transform: translateX(20px);
-            transform: translateX(20px);
-        }
-        .footer {
-            position: relative;
+
+        .container {
             width: 100%;
+            max-width: 900px;
+            height: 80vh;
+            background: var(--terminal-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 5;
+        }
+
+        .header {
+            padding: 10px 15px;
+            background: #1a1a1a;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .main-view {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .terminal-area {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        #output {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        #output::-webkit-scrollbar { width: 6px; }
+        #output::-webkit-scrollbar-thumb { background: var(--border); }
+
+        .line { margin-bottom: 5px; line-height: 1.5; word-break: break-all; }
+        .prompt-symbol { color: var(--blue); font-weight: bold; }
+        .command-text { color: #fff; }
+        .system-msg { color: var(--dim-green); font-style: italic; }
+        .highlight { background: rgba(0, 255, 65, 0.2); color: var(--green); border-radius: 2px; padding: 0 2px; }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            outline: none;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 250px;
+            border-left: 1px solid var(--border);
+            padding: 20px;
+            background: #0d0d0d;
+        }
+
+        @media (max-width: 700px) {
+            .sidebar { display: none; }
+        }
+
+        .objective {
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        .objective-title {
+            color: #888;
+            margin-bottom: 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .task {
+            padding: 8px;
+            border: 1px solid #222;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .task.completed {
+            border-color: var(--green);
+            background: rgba(0, 255, 65, 0.05);
+            color: var(--green);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #333;
+        }
+
+        .completed .status-dot {
+            background: var(--green);
+            box-shadow: 0 0 5px var(--green);
+        }
+
+        .message-box {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--green);
+            color: #000;
             padding: 10px 20px;
-            font-size: 1em;
-            color: var(--footer-text-color);
-            background-color: transparent;
-            flex-shrink: 0;
-            margin-top: 1.7rem;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translate(-50%, 20px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
         }
     </style>
 </head>
-<body class="dark-mode">
-    <h1>Arduino Car BLE Controller</h1>
+<body>
+
+<div class="container">
+    <div class="header">
+        <span>SCAVENGER_TERMINAL v1.0.4</span>
+        <span id="clock">00:00:00</span>
+    </div>
+
+    <div class="main-view">
+        <div class="terminal-area">
+            <div id="output">
+                <div class="line system-msg">Initializing digital forensic scan...</div>
+                <div class="line">Target found: <span style="color: var(--blue)">clues.txt</span> (1,024 KB)</div>
+                <div class="line">Status: Junk text detected. Filter required.</div>
+                <div class="line" style="color: #666; margin-top: 10px;">Hint: Use <span style="color: #aaa">grep "search_term" clues.txt</span></div>
+                <div class="line">&nbsp;</div>
+            </div>
+            <div class="input-line">
+                <span class="prompt-symbol">detective@case:~$</span>
+                <input type="text" id="terminal-input" autofocus spellcheck="false" autocomplete="off" placeholder="Type here...">
+            </div>
+        </div>
+
+        <aside class="sidebar">
+            <div class="objective">
+                <div class="objective-title">Evidence Files</div>
+                <div id="obj-apple" class="task">
+                    <div class="status-dot"></div>
+                    <span>Secret Password</span>
+                </div>
+                <div id="obj-415" class="task">
+                    <div class="status-dot"></div>
+                    <span>Phone Number</span>
+                </div>
+                <div id="obj-code" class="task">
+                    <div class="status-dot"></div>
+                    <span>Hidden Code</span>
+                </div>
+            </div>
+            <div style="font-size: 10px; color: #444; line-height: 1.4;">
+                SYSTEM NOTICE:<br>
+                Search for "apple", starts with "415", or "CODE." to extract data.
+            </div>
+        </aside>
+    </div>
+</div>
+
+<div id="success-msg" class="message-box">EVIDENCE SECURED - CASE CLOSED</div>
+
+<script>
+    const output = document.getElementById('output');
+    const input = document.getElementById('terminal-input');
+    const clock = document.getElementById('clock');
+    const successMsg = document.getElementById('success-msg');
+
+    const tasks = {
+        apple: false,
+        phone: false,
+        code: false
+    };
+
+    // Generate simulated data for clues.txt
+    const junkData = [];
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
     
-    <div class="control-panel">
-        <button id="forwardBtn" ontouchstart="sendCommand('f')" ontouchend="sendCommand('s')" onmousedown="sendCommand('f')" onmouseup="sendCommand('s')">↑</button>
-        <button id="leftBtn" ontouchstart="sendCommand('l')" ontouchend="sendCommand('s')" onmousedown="sendCommand('l')" onmouseup="sendCommand('s')">←</button>
-        <button id="stopBtn" onclick="sendCommand('s')">STOP</button>
-        <button id="rightBtn" ontouchstart="sendCommand('r')" ontouchend="sendCommand('s')" onmousedown="sendCommand('r')" onmouseup="sendCommand('s')">→</button>
-        <button id="backBtn" ontouchstart="sendCommand('b')" ontouchend="sendCommand('s')" onmousedown="sendCommand('b')" onmouseup="sendCommand('s')">↓</button>
-    </div>
-    
-    <div class="action-buttons">
-        <button id="connectESP32Btn" onclick="connectESP32()">Connect to BLE</button>
-        <button id="modeBtn" onclick="toggleMode()">Switch to Joystick Mode</button>
-    </div>
-    <div id="status">Status: Disconnected</div>
-
-    <div class="toggle-container">
-        <span>Light Mode</span>
-        <label class="switch">
-            <input type="checkbox" id="darkModeToggle" checked>
-            <span class="slider"></span>
-        </label>
-        <span>Dark Mode</span>
-    </div>
-
-    <footer class="footer">
-        <p>Made by Giscard</p>
-    </footer>
-
-    <script>
-        let esp32Characteristic;
-        const serviceUuid = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
-        const characteristicUuid = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
-        let currentMode = 'manual'; // 'manual' or 'joystick'
-        let gamepadIntervalId = null;
-        let xboxGamepad = null;
-        const gamepadDeadzone = 0.2; // Joystick deadzone to prevent accidental inputs
-        let lastCommandSent = 's'; // Store the last command sent to avoid redundancy
-
-        const controlButtons = ['forwardBtn', 'leftBtn', 'stopBtn', 'rightBtn', 'backBtn'];
-
-        async function connectESP32() {
-            try {
-                document.getElementById('status').textContent = "Status: Connecting to ESP32...";
-                const device = await navigator.bluetooth.requestDevice({
-                    filters: [{ name: "Arduino-BLE-Bridge" }],
-                    optionalServices: [serviceUuid]
-                });
-                
-                const server = await device.gatt.connect();
-                const service = await server.getPrimaryService(serviceUuid);
-                esp32Characteristic = await service.getCharacteristic(characteristicUuid);
-                
-                document.getElementById('status').textContent = "Status: ESP32 Connected";
-                document.getElementById('connectESP32Btn').textContent = "ESP32 Connected";
-                document.getElementById('connectESP32Btn').disabled = true;
-                
-                device.addEventListener('gattserverdisconnected', () => {
-                    document.getElementById('status').textContent = "Status: ESP32 Disconnected";
-                    document.getElementById('connectESP32Btn').textContent = "Connect to BLE";
-                    document.getElementById('connectESP32Btn').disabled = false;
-                    // If gamepad mode is active and ESP32 disconnects, revert to manual
-                    if (currentMode === 'joystick') {
-                        toggleMode(); // This will switch back to manual and stop gamepad polling
-                    }
-                });
-            } catch (error) {
-                console.error("BLE Connection Error:", error);
-                document.getElementById('status').textContent = `Status: Connection failed (${error.message || error})`;
-            }
+    for (let i = 0; i < 200; i++) {
+        if (i === 42) {
+            junkData.push("SYSTEM_LOG: The secret vault password is 'crimson_apple_77'");
+        } else if (i === 87) {
+            junkData.push("415-555-0199: Return calls only after midnight.");
+        } else if (i === 156) {
+            junkData.push("Operational directive: ensure CODE. PHANTOM is strictly followed.");
+        } else {
+            let row = "";
+            for (let j = 0; j < 35; j++) row += chars.charAt(Math.floor(Math.random() * chars.length));
+            junkData.push(row + (i % 5 === 0 ? " [BUFFER_LOG]" : ""));
         }
-        
-        function sendCommand(command) {
-            if (!esp32Characteristic) {
-                document.getElementById('status').textContent = "Status: Not connected to ESP32. Please connect first.";
+    }
+
+    // Update Clock
+    function updateClock() {
+        const now = new Date();
+        clock.innerText = now.toTimeString().split(' ')[0];
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function writeToTerminal(text, type = "") {
+        const div = document.createElement('div');
+        div.className = `line ${type}`;
+        div.innerHTML = text;
+        output.appendChild(div);
+        output.scrollTop = output.scrollHeight;
+    }
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const cmd = input.value.trim();
+            if (!cmd) return;
+
+            writeToTerminal(`<span class="prompt-symbol">detective@case:~$</span> <span class="command-text">${cmd}</span>`);
+            processCommand(cmd);
+            input.value = "";
+        }
+    });
+
+    function processCommand(cmd) {
+        const parts = cmd.toLowerCase().split(/\s+/);
+        const action = parts[0];
+
+        if (action === 'clear') {
+            output.innerHTML = '';
+            return;
+        }
+
+        if (action === 'help') {
+            writeToTerminal("COMMANDS: grep [pattern] clues.txt, ls, cat, clear", "system-msg");
+            return;
+        }
+
+        if (action === 'ls') {
+            writeToTerminal("clues.txt  system.log  README.md");
+            return;
+        }
+
+        if (action === 'grep') {
+            // Basic simulation of grep behavior
+            const filename = parts[parts.length - 1];
+            if (filename !== 'clues.txt') {
+                writeToTerminal("Usage: grep [pattern] clues.txt", "system-msg");
                 return;
             }
-            // Only send if the command is different from the last one in joystick mode,
-            // or always send in manual mode (buttons imply an immediate action).
-            if (currentMode === 'manual' || command !== lastCommandSent) {
-                const buffer = new Uint8Array([command.charCodeAt(0)]);
-                esp32Characteristic.writeValue(buffer)
-                    .then(() => {
-                        lastCommandSent = command; // Update last sent command on success
-                    })
-                    .catch(error => {
-                        console.error('Error sending command:', error);
-                        document.getElementById('status').textContent = "Status: Error sending command";
-                    });
-            }
-        }
 
-        function toggleMode() {
-            const modeBtn = document.getElementById('modeBtn');
-            if (currentMode === 'manual') {
-                currentMode = 'joystick';
-                modeBtn.textContent = 'Switch to Manual Mode';
-                setControlButtonsEnabled(false);
-                startGamepadPolling();
-                document.getElementById('status').textContent = "Status: Joystick Mode Active. Waiting for Gamepad...";
-            } else {
-                currentMode = 'manual';
-                modeBtn.textContent = 'Switch to Joystick Mode';
-                setControlButtonsEnabled(true);
-                stopGamepadPolling();
-                document.getElementById('status').textContent = esp32Characteristic ? "Status: ESP32 Connected" : "Status: Disconnected";
+            // Extract pattern (handling quotes)
+            const match = cmd.match(/"([^"]+)"|'([^']+)'|(\S+)/g);
+            if (!match || match.length < 2) {
+                writeToTerminal("Error: No search pattern provided.", "system-msg");
+                return;
             }
-        }
+            
+            const pattern = (match[1] || match[1]).replace(/['"]/g, "");
+            let foundCount = 0;
 
-        function setControlButtonsEnabled(enabled) {
-            controlButtons.forEach(btnId => {
-                document.getElementById(btnId).disabled = !enabled;
+            junkData.forEach((line, index) => {
+                if (line.toLowerCase().includes(pattern.toLowerCase())) {
+                    const highlighted = line.replace(new RegExp(pattern, 'gi'), (m) => `<span class="highlight">${m}</span>`);
+                    writeToTerminal(`[LINE ${index}] ${highlighted}`);
+                    foundCount++;
+                    checkEvidence(line);
+                }
             });
+
+            if (foundCount === 0) {
+                writeToTerminal(`No matches found for "${pattern}"`, "system-msg");
+            }
+        } else {
+            writeToTerminal(`Command not found: ${action}. Type 'help' for options.`, "system-msg");
         }
+    }
 
-        function startGamepadPolling() {
-            if (gamepadIntervalId) clearInterval(gamepadIntervalId);
-            lastCommandSent = 's'; // Reset last command when starting joystick mode
-            gamepadIntervalId = setInterval(checkGamepad, 100); // Check gamepad every 100ms
+    function checkEvidence(line) {
+        // Mission 1: Apple
+        if (line.includes("apple") && !tasks.apple) {
+            tasks.apple = true;
+            document.getElementById('obj-apple').classList.add('completed');
+            notifyProgress();
         }
-
-        function stopGamepadPolling() {
-            if (gamepadIntervalId) {
-                clearInterval(gamepadIntervalId);
-                gamepadIntervalId = null;
-            }
-            xboxGamepad = null; // Clear gamepad reference
-            sendCommand('s'); // Send stop command when exiting joystick mode
-            lastCommandSent = 's'; // Reset last command
+        // Mission 2: Phone Number (starts with 415)
+        if (line.startsWith("415") && !tasks.phone) {
+            tasks.phone = true;
+            document.getElementById('obj-415').classList.add('completed');
+            notifyProgress();
         }
-
-        function checkGamepad() {
-            const gamepads = navigator.getGamepads();
-            xboxGamepad = null;
-            for (let i = 0; i < gamepads.length; i++) {
-                if (gamepads[i] && gamepads[i].id.includes('Xbox')) { // Simple check for Xbox controller
-                    xboxGamepad = gamepads[i];
-                    break;
-                }
+        // Mission 3: CODE. [CAPS]
+        if (line.includes("CODE.") && !tasks.code) {
+            const capsMatch = line.match(/CODE\.\s+([A-Z]+)/);
+            if (capsMatch) {
+                tasks.code = true;
+                document.getElementById('obj-code').classList.add('completed');
+                notifyProgress();
             }
-
-            if (!xboxGamepad) {
-                document.getElementById('status').textContent = "Status: Joystick Mode Active. No Xbox Gamepad Found.";
-                sendCommand('s'); // Stop if gamepad disappears
-                return;
-            }
-
-            if (!esp32Characteristic) {
-                document.getElementById('status').textContent = "Status: Joystick Mode Active. ESP32 Not Connected.";
-                sendCommand('s'); // Stop if ESP32 not connected
-                return;
-            }
-
-            document.getElementById('status').textContent = "Status: Joystick Mode Active (Xbox Gamepad Connected)";
-
-            // Example: Left stick for movement
-            const leftStickX = xboxGamepad.axes[0]; // Horizontal axis of left stick
-            const leftStickY = xboxGamepad.axes[1]; // Vertical axis of left stick (inverted for forward/backward)
-
-            let commandToSend = 's'; // Default to stop
-
-            if (Math.abs(leftStickY) > gamepadDeadzone || Math.abs(leftStickX) > gamepadDeadzone) {
-                if (leftStickY < -gamepadDeadzone && Math.abs(leftStickY) > Math.abs(leftStickX)) {
-                    commandToSend = 'f'; // Forward
-                } else if (leftStickY > gamepadDeadzone && Math.abs(leftStickY) > Math.abs(leftStickX)) {
-                    commandToSend = 'b'; // Backward
-                } else if (leftStickX < -gamepadDeadzone && Math.abs(leftStickX) > Math.abs(leftStickY)) {
-                    commandToSend = 'l'; // Left
-                } else if (leftStickX > gamepadDeadzone && Math.abs(leftStickX) > Math.abs(leftStickY)) {
-                    commandToSend = 'r'; // Right
-                }
-            }
-            sendCommand(commandToSend);
         }
+    }
 
-        // Dark Mode Toggle
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        darkModeToggle.addEventListener('change', () => {
-            document.body.classList.toggle('dark-mode', darkModeToggle.checked);
-        });
+    function notifyProgress() {
+        if (tasks.apple && tasks.phone && tasks.code) {
+            successMsg.style.display = 'block';
+        }
+    }
+</script>
 
-        // Set initial dark mode state based on checkbox
-        document.body.classList.toggle('dark-mode', darkModeToggle.checked);
-        setControlButtonsEnabled(true); // Ensure buttons are enabled initially
-    </script>
 </body>
 </html>
+
