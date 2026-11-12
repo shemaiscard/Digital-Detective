@@ -10,7 +10,10 @@
 
     // Objective test: some stage ran `name` and its arguments contain every needle.
     function uses(name, ...needles) {
+        // For git the first needle is the subcommand and must come right after "git".
+        const sub = name === 'git' ? needles.shift() : null;
         return rec => rec.stages.some(s => s.argv[0] === name && !s.failed && (s.code === 0 || (name !== 'git' && s.code === 1)) &&
+            (sub == null || s.argv[1] === sub) &&
             needles.every(n => (n instanceof RegExp ? s.argv.slice(1).some(a => n.test(a)) : s.argv.includes(n))));
     }
     const piped = rec => rec.stages.length >= 2 && rec.code === 0;

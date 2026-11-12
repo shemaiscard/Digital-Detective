@@ -712,7 +712,9 @@
 
     SUB.reflog = function (repo, args, ctx) {
         if (!repo.reflogList.length) { ctx.err("fatal: your current branch has no history yet"); return 128; }
-        repo.reflogList.forEach((e, i) => {
+        const o = DD.getopt(args[0] === 'show' ? args.slice(1) : args, 'n');
+        const limit = o.n != null ? parseInt(o.n, 10) : Infinity;
+        repo.reflogList.slice(0, Number.isFinite(limit) ? Math.max(0, limit) : undefined).forEach((e, i) => {
             ctx.parts([{ t: short(e.hash), c: 'c-hash', run: 'git show ' + short(e.hash) }].concat(repo.decor(e.hash), [{ t: ` HEAD@{${i}}: ${e.msg}` }]));
         });
         return 0;
