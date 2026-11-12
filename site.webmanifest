@@ -1,7 +1,7 @@
 {
   "name": "Digital Detective",
   "short_name": "Detective",
-  "description": "A terminal-style scavenger hunt.",
+  "description": "A detective game you play by typing real shell and git commands.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

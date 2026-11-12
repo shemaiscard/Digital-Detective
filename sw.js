@@ -1,7 +1,13 @@
-const CACHE_NAME = 'detective-v1';
+const CACHE_NAME = 'detective-v2';
 const ASSETS = [
   '/',
   '/index.html',
+  '/css/style.css?v=2',
+  '/js/core.js?v=2',
+  '/js/shell.js?v=2',
+  '/js/git.js?v=2',
+  '/js/cases.js?v=2',
+  '/js/game.js?v=2',
   '/site.webmanifest',
   '/favicon.ico',
   '/favicon.svg',
